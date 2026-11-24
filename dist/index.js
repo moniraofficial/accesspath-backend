@@ -3,23 +3,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_dns_1 = __importDefault(require("node:dns"));
+node_dns_1.default.setServers(["8.8.8.8", "1.1.1.1"]);
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
+const error_middleware_js_1 = require("./middlewares/error.middleware.js");
+const apiResponse_js_1 = require("./utils/apiResponse.js");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
-// Middleware
+// Core Middlewares
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-// Test Route
+// Root Health / Test Endpoint
 app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "AccessPath TypeScript backend server is running",
-    });
+    return (0, apiResponse_js_1.sendResponse)(res, 200, "AccessPath TypeScript backend server is running");
 });
+// 404 Route Not Found Middleware
+app.use(error_middleware_js_1.notFoundHandler);
+// Global Centralized Error Handling Middleware
+app.use(error_middleware_js_1.errorHandler);
 // MongoDB Connection & Server Start
 const connectDBAndStartServer = async () => {
     try {
