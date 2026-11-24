@@ -3,15 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("./config/env.js");
 const node_dns_1 = __importDefault(require("node:dns"));
 node_dns_1.default.setServers(["8.8.8.8", "1.1.1.1"]);
-const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const error_middleware_js_1 = require("./middlewares/error.middleware.js");
 const apiResponse_js_1 = require("./utils/apiResponse.js");
-dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 // Core Middlewares

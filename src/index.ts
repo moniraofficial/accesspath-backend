@@ -1,15 +1,14 @@
+import "./config/env.js";
+
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 import { sendResponse } from "./utils/apiResponse.js";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

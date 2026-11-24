@@ -20,59 +20,54 @@ exports.ROLE_HIERARCHY = {
     [exports.UserRole.REGULAR]: 1,
 };
 exports.Permissions = {
-    // User Management
+    // Administrative & Governance
     MANAGE_USERS: "manage_users",
-    // Locations
-    SEARCH_LOCATIONS: "search_locations",
-    SUBMIT_LOCATIONS: "submit_locations",
-    VERIFY_LOCATIONS: "verify_locations",
-    MANAGE_LOCATIONS: "manage_locations",
-    // Barriers
-    REPORT_BARRIERS: "report_barriers",
-    VERIFY_BARRIERS: "verify_barriers",
-    MANAGE_BARRIERS: "manage_barriers",
-    // Reviews & Feedback
-    SUBMIT_FEEDBACK: "submit_feedback",
-    MODERATE_FEEDBACK: "moderate_feedback",
-    // Favorites
-    MANAGE_FAVORITES: "manage_favorites",
-    // Analytics & System
+    MANAGE_CATEGORIES: "manage_categories",
+    MANAGE_ACCESSIBILITY_DATA: "manage_accessibility_data",
     VIEW_ANALYTICS: "view_analytics",
     CONFIGURE_SYSTEM: "configure_system",
+    // Verification & Moderation (Section 6 compliant)
+    VERIFY_LOCATIONS: "verify_locations",
+    VERIFY_BARRIERS: "verify_barriers",
+    MANAGE_LOCATIONS: "manage_locations",
+    MANAGE_BARRIERS: "manage_barriers",
+    MODERATE_FEEDBACK: "moderate_feedback",
+    // Community Contribution
+    SUBMIT_LOCATIONS: "submit_locations",
+    UPDATE_LOCATIONS: "update_locations",
+    TRACK_CONTRIBUTIONS: "track_contributions",
+    // Consumer Mobility
+    SEARCH_LOCATIONS: "search_locations",
+    REPORT_BARRIERS: "report_barriers",
+    SUBMIT_FEEDBACK: "submit_feedback",
+    MANAGE_FAVORITES: "manage_favorites",
 };
 exports.ROLE_PERMISSIONS = {
     [exports.UserRole.ADMIN]: [
         exports.Permissions.MANAGE_USERS,
-        exports.Permissions.SEARCH_LOCATIONS,
-        exports.Permissions.SUBMIT_LOCATIONS,
-        exports.Permissions.VERIFY_LOCATIONS,
+        exports.Permissions.MANAGE_CATEGORIES,
         exports.Permissions.MANAGE_LOCATIONS,
-        exports.Permissions.REPORT_BARRIERS,
-        exports.Permissions.VERIFY_BARRIERS,
+        exports.Permissions.MANAGE_ACCESSIBILITY_DATA,
         exports.Permissions.MANAGE_BARRIERS,
-        exports.Permissions.SUBMIT_FEEDBACK,
-        exports.Permissions.MODERATE_FEEDBACK,
-        exports.Permissions.MANAGE_FAVORITES,
         exports.Permissions.VIEW_ANALYTICS,
         exports.Permissions.CONFIGURE_SYSTEM,
+        exports.Permissions.VERIFY_LOCATIONS,
+        exports.Permissions.VERIFY_BARRIERS,
     ],
     [exports.UserRole.MODERATOR]: [
-        exports.Permissions.SEARCH_LOCATIONS,
         exports.Permissions.VERIFY_LOCATIONS,
-        exports.Permissions.MANAGE_LOCATIONS,
-        exports.Permissions.REPORT_BARRIERS,
         exports.Permissions.VERIFY_BARRIERS,
+        exports.Permissions.MANAGE_LOCATIONS,
         exports.Permissions.MANAGE_BARRIERS,
-        exports.Permissions.SUBMIT_FEEDBACK,
         exports.Permissions.MODERATE_FEEDBACK,
-        exports.Permissions.MANAGE_FAVORITES,
+        exports.Permissions.SEARCH_LOCATIONS,
     ],
     [exports.UserRole.CONTRIBUTOR]: [
-        exports.Permissions.SEARCH_LOCATIONS,
         exports.Permissions.SUBMIT_LOCATIONS,
+        exports.Permissions.UPDATE_LOCATIONS,
         exports.Permissions.REPORT_BARRIERS,
-        exports.Permissions.SUBMIT_FEEDBACK,
-        exports.Permissions.MANAGE_FAVORITES,
+        exports.Permissions.TRACK_CONTRIBUTIONS,
+        exports.Permissions.SEARCH_LOCATIONS,
     ],
     [exports.UserRole.REGULAR]: [
         exports.Permissions.SEARCH_LOCATIONS,

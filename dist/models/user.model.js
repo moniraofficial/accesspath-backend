@@ -23,7 +23,7 @@ const userSchema = new mongoose_1.Schema({
     password: {
         type: String,
         required: [true, "Password hash is required"],
-        minlength: [6, "Password must be at least 6 characters"],
+        minlength: [8, "Password must be at least 8 characters"],
         select: false, // Prevents password hash from being selected by default
     },
     role: {

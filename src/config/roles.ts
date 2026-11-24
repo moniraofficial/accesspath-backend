@@ -22,25 +22,30 @@ export const ROLE_HIERARCHY: Record<UserRoleType, number> = {
 };
 
 export const Permissions = {
-  // User Management
+  // Administrative & Governance
   MANAGE_USERS: "manage_users",
-  // Locations
-  SEARCH_LOCATIONS: "search_locations",
-  SUBMIT_LOCATIONS: "submit_locations",
-  VERIFY_LOCATIONS: "verify_locations",
-  MANAGE_LOCATIONS: "manage_locations",
-  // Barriers
-  REPORT_BARRIERS: "report_barriers",
-  VERIFY_BARRIERS: "verify_barriers",
-  MANAGE_BARRIERS: "manage_barriers",
-  // Reviews & Feedback
-  SUBMIT_FEEDBACK: "submit_feedback",
-  MODERATE_FEEDBACK: "moderate_feedback",
-  // Favorites
-  MANAGE_FAVORITES: "manage_favorites",
-  // Analytics & System
+  MANAGE_CATEGORIES: "manage_categories",
+  MANAGE_ACCESSIBILITY_DATA: "manage_accessibility_data",
   VIEW_ANALYTICS: "view_analytics",
   CONFIGURE_SYSTEM: "configure_system",
+
+  // Verification & Moderation (Section 6 compliant)
+  VERIFY_LOCATIONS: "verify_locations",
+  VERIFY_BARRIERS: "verify_barriers",
+  MANAGE_LOCATIONS: "manage_locations",
+  MANAGE_BARRIERS: "manage_barriers",
+  MODERATE_FEEDBACK: "moderate_feedback",
+
+  // Community Contribution
+  SUBMIT_LOCATIONS: "submit_locations",
+  UPDATE_LOCATIONS: "update_locations",
+  TRACK_CONTRIBUTIONS: "track_contributions",
+
+  // Consumer Mobility
+  SEARCH_LOCATIONS: "search_locations",
+  REPORT_BARRIERS: "report_barriers",
+  SUBMIT_FEEDBACK: "submit_feedback",
+  MANAGE_FAVORITES: "manage_favorites",
 } as const;
 
 export type PermissionType = (typeof Permissions)[keyof typeof Permissions];
@@ -48,36 +53,29 @@ export type PermissionType = (typeof Permissions)[keyof typeof Permissions];
 export const ROLE_PERMISSIONS: Record<UserRoleType, readonly PermissionType[]> = {
   [UserRole.ADMIN]: [
     Permissions.MANAGE_USERS,
-    Permissions.SEARCH_LOCATIONS,
-    Permissions.SUBMIT_LOCATIONS,
-    Permissions.VERIFY_LOCATIONS,
+    Permissions.MANAGE_CATEGORIES,
     Permissions.MANAGE_LOCATIONS,
-    Permissions.REPORT_BARRIERS,
-    Permissions.VERIFY_BARRIERS,
+    Permissions.MANAGE_ACCESSIBILITY_DATA,
     Permissions.MANAGE_BARRIERS,
-    Permissions.SUBMIT_FEEDBACK,
-    Permissions.MODERATE_FEEDBACK,
-    Permissions.MANAGE_FAVORITES,
     Permissions.VIEW_ANALYTICS,
     Permissions.CONFIGURE_SYSTEM,
+    Permissions.VERIFY_LOCATIONS,
+    Permissions.VERIFY_BARRIERS,
   ],
   [UserRole.MODERATOR]: [
-    Permissions.SEARCH_LOCATIONS,
     Permissions.VERIFY_LOCATIONS,
-    Permissions.MANAGE_LOCATIONS,
-    Permissions.REPORT_BARRIERS,
     Permissions.VERIFY_BARRIERS,
+    Permissions.MANAGE_LOCATIONS,
     Permissions.MANAGE_BARRIERS,
-    Permissions.SUBMIT_FEEDBACK,
     Permissions.MODERATE_FEEDBACK,
-    Permissions.MANAGE_FAVORITES,
+    Permissions.SEARCH_LOCATIONS,
   ],
   [UserRole.CONTRIBUTOR]: [
-    Permissions.SEARCH_LOCATIONS,
     Permissions.SUBMIT_LOCATIONS,
+    Permissions.UPDATE_LOCATIONS,
     Permissions.REPORT_BARRIERS,
-    Permissions.SUBMIT_FEEDBACK,
-    Permissions.MANAGE_FAVORITES,
+    Permissions.TRACK_CONTRIBUTIONS,
+    Permissions.SEARCH_LOCATIONS,
   ],
   [UserRole.REGULAR]: [
     Permissions.SEARCH_LOCATIONS,
