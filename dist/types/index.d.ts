@@ -1,6 +1,8 @@
 import type { Request } from "express";
 import { UserRoleType } from "../config/roles.js";
 export * from "./user.types.js";
+export * from "./refresh-token.types.js";
+export * from "./failed-login.types.js";
 export interface IAuthUser {
     id: string;
     email: string;
