@@ -52,12 +52,12 @@ export declare function generateAccessToken(payload: IAccessTokenSignPayload): s
 export declare function generateRefreshToken(payload: IRefreshTokenSignPayload): string;
 /**
  * Verifies an access token's signature, expiration, and claims.
- * Enforces tokenType: "access".
+ * Enforces tokenType: "access" and strict types on all required claims.
  */
 export declare function verifyAccessToken(token: string): IAccessTokenClaims;
 /**
  * Verifies a refresh token's signature, expiration, and claims.
- * Enforces tokenType: "refresh".
+ * Enforces tokenType: "refresh" and strict types on all required claims.
  */
 export declare function verifyRefreshToken(token: string): IRefreshTokenClaims;
 /**
@@ -68,6 +68,8 @@ export declare function verifyRefreshToken(token: string): IRefreshTokenClaims;
 export declare function encryptReplacementPayload(payload: IReplacementPayload, keyVersion?: string): IEncryptedPayload;
 /**
  * Decrypts an AES-256-GCM replacement-token payload.
+ * Validates all hex-encoded fields before Buffer conversion.
+ * Validates decrypted JSON structure before returning.
  * Verifies the GCM auth tag; handles wrong keys, tampered data, or malformed IVs safely.
  */
 export declare function decryptReplacementPayload(encrypted: IEncryptedPayload): IReplacementPayload;

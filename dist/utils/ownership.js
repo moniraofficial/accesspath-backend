@@ -1,20 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.assertResourceOwnership = assertResourceOwnership;
+exports.assertOwnershipOrAdmin = assertOwnershipOrAdmin;
 exports.assertCanModifyOwnPendingResource = assertCanModifyOwnPendingResource;
 exports.assertCanModerateResource = assertCanModerateResource;
 exports.hasPermission = hasPermission;
 const roles_js_1 = require("../config/roles.js");
 const apiError_js_1 = require("./apiError.js");
 /**
- * Asserts that the authenticated user owns the resource, or possesses administrative authority.
- * Throws HTTP 403 if unauthorized.
+ * Asserts that the authenticated user is the resource owner.
+ * Does NOT grant Admins an automatic bypass — use assertOwnershipOrAdmin when
+ * an admin override is explicitly appropriate for the operation.
+ * Throws HTTP 403 if the caller is not the owner.
  */
 function assertResourceOwnership(resourceOwnerId, currentUser, resourceName = "resource") {
-    // Admins possess authorized administrative override
-    if (currentUser.role === roles_js_1.UserRole.ADMIN) {
-        return;
-    }
     const ownerIdStr = resourceOwnerId.toString();
     const currentUserIdStr = currentUser.id.toString();
     if (ownerIdStr !== currentUserIdStr) {
@@ -22,13 +21,26 @@ function assertResourceOwnership(resourceOwnerId, currentUser, resourceName = "r
     }
 }
 /**
- * Asserts that the authenticated user owns a contribution and it is still in 'pending' status.
- * Contributors cannot directly modify resources once verified or rejected.
+ * Asserts that the authenticated user either owns the resource OR holds the Admin role.
+ * This helper is intentionally named to make admin-override intent explicit at the call site.
+ * Use this only where admin access to any user's resource has been deliberately authorized
+ * (e.g. admin user-management routes, not general content routes).
+ * Throws HTTP 403 if neither condition is satisfied.
  */
-function assertCanModifyOwnPendingResource(resourceOwnerId, resourceStatus, currentUser, resourceName = "submission") {
+function assertOwnershipOrAdmin(resourceOwnerId, currentUser, resourceName = "resource") {
     if (currentUser.role === roles_js_1.UserRole.ADMIN) {
         return;
     }
+    assertResourceOwnership(resourceOwnerId, currentUser, resourceName);
+}
+/**
+ * Asserts that the authenticated user owns a contribution and it is still in 'pending' status.
+ * Uses pure ownership check (no implicit admin bypass) — admins must use moderation routes,
+ * not author routes, to modify any submission.
+ * Throws HTTP 403 if the caller is not the owner or if the resource is no longer pending.
+ */
+function assertCanModifyOwnPendingResource(resourceOwnerId, resourceStatus, currentUser, resourceName = "submission") {
+    // Ownership check without admin bypass: admins have dedicated moderation routes
     assertResourceOwnership(resourceOwnerId, currentUser, resourceName);
     if (resourceStatus !== "pending") {
         throw apiError_js_1.ApiError.forbidden(`Access Denied: You cannot modify a ${resourceName} that is already ${resourceStatus}.`);

@@ -65,7 +65,7 @@ function generateRefreshToken(payload) {
 }
 /**
  * Verifies an access token's signature, expiration, and claims.
- * Enforces tokenType: "access".
+ * Enforces tokenType: "access" and strict types on all required claims.
  */
 function verifyAccessToken(token) {
     if (!token || typeof token !== "string") {
@@ -76,7 +76,11 @@ function verifyAccessToken(token) {
         if (decoded.tokenType !== "access") {
             throw apiError_js_1.ApiError.unauthorized("Invalid token type: expected access token.");
         }
-        if (!decoded.userId || !decoded.email || !decoded.role || decoded.tokenVersion === undefined || !decoded.familyId) {
+        if (typeof decoded.userId !== "string" || !decoded.userId ||
+            typeof decoded.email !== "string" || !decoded.email ||
+            typeof decoded.role !== "string" || !decoded.role ||
+            typeof decoded.tokenVersion !== "number" ||
+            typeof decoded.familyId !== "string" || !decoded.familyId) {
             throw apiError_js_1.ApiError.unauthorized("Invalid access token claims.");
         }
         return decoded;
@@ -96,7 +100,7 @@ function verifyAccessToken(token) {
 }
 /**
  * Verifies a refresh token's signature, expiration, and claims.
- * Enforces tokenType: "refresh".
+ * Enforces tokenType: "refresh" and strict types on all required claims.
  */
 function verifyRefreshToken(token) {
     if (!token || typeof token !== "string") {
@@ -107,7 +111,9 @@ function verifyRefreshToken(token) {
         if (decoded.tokenType !== "refresh") {
             throw apiError_js_1.ApiError.unauthorized("Invalid token type: expected refresh token.");
         }
-        if (!decoded.userId || !decoded.familyId || !decoded.jti) {
+        if (typeof decoded.userId !== "string" || !decoded.userId ||
+            typeof decoded.familyId !== "string" || !decoded.familyId ||
+            typeof decoded.jti !== "string" || !decoded.jti) {
             throw apiError_js_1.ApiError.unauthorized("Invalid refresh token claims.");
         }
         return decoded;
@@ -147,11 +153,24 @@ function encryptReplacementPayload(payload, keyVersion) {
 }
 /**
  * Decrypts an AES-256-GCM replacement-token payload.
+ * Validates all hex-encoded fields before Buffer conversion.
+ * Validates decrypted JSON structure before returning.
  * Verifies the GCM auth tag; handles wrong keys, tampered data, or malformed IVs safely.
  */
 function decryptReplacementPayload(encrypted) {
     if (!encrypted || !encrypted.ciphertext || !encrypted.iv || !encrypted.authTag || !encrypted.keyVersion) {
         throw apiError_js_1.ApiError.unauthorized("Invalid encrypted payload structure.");
+    }
+    // Validate that iv, authTag, and ciphertext are valid lowercase hex strings before Buffer.from()
+    const HEX_RE = /^[0-9a-fA-F]+$/;
+    if (!HEX_RE.test(encrypted.iv)) {
+        throw apiError_js_1.ApiError.unauthorized("Invalid initialization vector encoding.");
+    }
+    if (!HEX_RE.test(encrypted.authTag)) {
+        throw apiError_js_1.ApiError.unauthorized("Invalid authentication tag encoding.");
+    }
+    if (!HEX_RE.test(encrypted.ciphertext)) {
+        throw apiError_js_1.ApiError.unauthorized("Invalid ciphertext encoding.");
     }
     try {
         const key = auth_js_1.authConfig.getEncryptionKey(encrypted.keyVersion);
@@ -166,7 +185,23 @@ function decryptReplacementPayload(encrypted) {
             decipher.update(Buffer.from(encrypted.ciphertext, "hex")),
             decipher.final(),
         ]).toString("utf8");
-        return JSON.parse(decrypted);
+        // Validate decrypted JSON structure before returning
+        let parsed;
+        try {
+            parsed = JSON.parse(decrypted);
+        }
+        catch {
+            throw apiError_js_1.ApiError.unauthorized("Decrypted payload is not valid JSON.");
+        }
+        if (typeof parsed !== "object" ||
+            parsed === null ||
+            typeof parsed.accessToken !== "string" ||
+            typeof parsed.refreshToken !== "string" ||
+            !parsed.accessToken ||
+            !parsed.refreshToken) {
+            throw apiError_js_1.ApiError.unauthorized("Decrypted payload has invalid structure.");
+        }
+        return parsed;
     }
     catch (error) {
         if (error instanceof apiError_js_1.ApiError) {

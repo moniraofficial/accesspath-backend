@@ -98,7 +98,7 @@ export function generateRefreshToken(payload: IRefreshTokenSignPayload): string 
 
 /**
  * Verifies an access token's signature, expiration, and claims.
- * Enforces tokenType: "access".
+ * Enforces tokenType: "access" and strict types on all required claims.
  */
 export function verifyAccessToken(token: string): IAccessTokenClaims {
   if (!token || typeof token !== "string") {
@@ -106,18 +106,24 @@ export function verifyAccessToken(token: string): IAccessTokenClaims {
   }
 
   try {
-    const decoded = jwt.verify(token, authConfig.jwtSecret) as Record<string, any>;
+    const decoded = jwt.verify(token, authConfig.jwtSecret) as Record<string, unknown>;
 
     if (decoded.tokenType !== "access") {
       throw ApiError.unauthorized("Invalid token type: expected access token.");
     }
 
-    if (!decoded.userId || !decoded.email || !decoded.role || decoded.tokenVersion === undefined || !decoded.familyId) {
+    if (
+      typeof decoded.userId !== "string" || !decoded.userId ||
+      typeof decoded.email !== "string" || !decoded.email ||
+      typeof decoded.role !== "string" || !decoded.role ||
+      typeof decoded.tokenVersion !== "number" ||
+      typeof decoded.familyId !== "string" || !decoded.familyId
+    ) {
       throw ApiError.unauthorized("Invalid access token claims.");
     }
 
-    return decoded as IAccessTokenClaims;
-  } catch (error: any) {
+    return decoded as unknown as IAccessTokenClaims;
+  } catch (error: unknown) {
     if (error instanceof ApiError) {
       throw error;
     }
@@ -133,7 +139,7 @@ export function verifyAccessToken(token: string): IAccessTokenClaims {
 
 /**
  * Verifies a refresh token's signature, expiration, and claims.
- * Enforces tokenType: "refresh".
+ * Enforces tokenType: "refresh" and strict types on all required claims.
  */
 export function verifyRefreshToken(token: string): IRefreshTokenClaims {
   if (!token || typeof token !== "string") {
@@ -141,18 +147,22 @@ export function verifyRefreshToken(token: string): IRefreshTokenClaims {
   }
 
   try {
-    const decoded = jwt.verify(token, authConfig.refreshSecret) as Record<string, any>;
+    const decoded = jwt.verify(token, authConfig.refreshSecret) as Record<string, unknown>;
 
     if (decoded.tokenType !== "refresh") {
       throw ApiError.unauthorized("Invalid token type: expected refresh token.");
     }
 
-    if (!decoded.userId || !decoded.familyId || !decoded.jti) {
+    if (
+      typeof decoded.userId !== "string" || !decoded.userId ||
+      typeof decoded.familyId !== "string" || !decoded.familyId ||
+      typeof decoded.jti !== "string" || !decoded.jti
+    ) {
       throw ApiError.unauthorized("Invalid refresh token claims.");
     }
 
-    return decoded as IRefreshTokenClaims;
-  } catch (error: any) {
+    return decoded as unknown as IRefreshTokenClaims;
+  } catch (error: unknown) {
     if (error instanceof ApiError) {
       throw error;
     }
@@ -195,11 +205,25 @@ export function encryptReplacementPayload(
 
 /**
  * Decrypts an AES-256-GCM replacement-token payload.
+ * Validates all hex-encoded fields before Buffer conversion.
+ * Validates decrypted JSON structure before returning.
  * Verifies the GCM auth tag; handles wrong keys, tampered data, or malformed IVs safely.
  */
 export function decryptReplacementPayload(encrypted: IEncryptedPayload): IReplacementPayload {
   if (!encrypted || !encrypted.ciphertext || !encrypted.iv || !encrypted.authTag || !encrypted.keyVersion) {
     throw ApiError.unauthorized("Invalid encrypted payload structure.");
+  }
+
+  // Validate that iv, authTag, and ciphertext are valid lowercase hex strings before Buffer.from()
+  const HEX_RE = /^[0-9a-fA-F]+$/;
+  if (!HEX_RE.test(encrypted.iv)) {
+    throw ApiError.unauthorized("Invalid initialization vector encoding.");
+  }
+  if (!HEX_RE.test(encrypted.authTag)) {
+    throw ApiError.unauthorized("Invalid authentication tag encoding.");
+  }
+  if (!HEX_RE.test(encrypted.ciphertext)) {
+    throw ApiError.unauthorized("Invalid ciphertext encoding.");
   }
 
   try {
@@ -219,8 +243,27 @@ export function decryptReplacementPayload(encrypted: IEncryptedPayload): IReplac
       decipher.final(),
     ]).toString("utf8");
 
-    return JSON.parse(decrypted) as IReplacementPayload;
-  } catch (error: any) {
+    // Validate decrypted JSON structure before returning
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(decrypted);
+    } catch {
+      throw ApiError.unauthorized("Decrypted payload is not valid JSON.");
+    }
+
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof (parsed as Record<string, unknown>).accessToken !== "string" ||
+      typeof (parsed as Record<string, unknown>).refreshToken !== "string" ||
+      !(parsed as Record<string, unknown>).accessToken ||
+      !(parsed as Record<string, unknown>).refreshToken
+    ) {
+      throw ApiError.unauthorized("Decrypted payload has invalid structure.");
+    }
+
+    return parsed as IReplacementPayload;
+  } catch (error: unknown) {
     if (error instanceof ApiError) {
       throw error;
     }

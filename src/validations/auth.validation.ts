@@ -32,48 +32,52 @@ export function validateRegistrationInput(data: unknown): IRegisterInput {
     throw ApiError.badRequest("Invalid request body: expected JSON object.");
   }
 
-  const body = data as Record<string, any>;
+  const body = data as Record<string, unknown>;
 
-  // Security Check: Public users cannot assign themselves privileged roles
-  if ("role" in body && body.role !== UserRole.REGULAR) {
+  // Security Check: Public users cannot assign themselves privileged roles.
+  // We explicitly check for the presence of the key and that it is not undefined/null
+  // before the string comparison, so a non-string value is also rejected.
+  if ("role" in body && body.role !== undefined && body.role !== null && body.role !== UserRole.REGULAR) {
     throw ApiError.badRequest("Assigning roles during public registration is not permitted.");
   }
 
-  const { name, email, password } = body;
+  const rawName = body.name;
+  const rawEmail = body.email;
+  const rawPassword = body.password;
 
   // Name validation
-  if (!name || typeof name !== "string") {
+  if (!rawName || typeof rawName !== "string") {
     throw ApiError.badRequest("Name is required and must be a string.");
   }
-  const trimmedName = name.trim();
+  const trimmedName = rawName.trim();
   if (trimmedName.length < 2 || trimmedName.length > 100) {
     throw ApiError.badRequest("Name must be between 2 and 100 characters.");
   }
 
   // Email validation & normalization
-  if (!email || typeof email !== "string") {
+  if (!rawEmail || typeof rawEmail !== "string") {
     throw ApiError.badRequest("Email is required and must be a string.");
   }
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = rawEmail.trim().toLowerCase();
   if (!EMAIL_REGEX.test(normalizedEmail)) {
     throw ApiError.badRequest("Please provide a valid email address.");
   }
 
   // Password validation (min 8 chars, letter + number)
-  if (!password || typeof password !== "string") {
+  if (!rawPassword || typeof rawPassword !== "string") {
     throw ApiError.badRequest("Password is required and must be a string.");
   }
-  if (password.length < 8) {
+  if (rawPassword.length < 8) {
     throw ApiError.badRequest("Password must be at least 8 characters long.");
   }
-  if (!PASSWORD_REGEX.test(password)) {
+  if (!PASSWORD_REGEX.test(rawPassword)) {
     throw ApiError.badRequest("Password must contain at least one letter and one number.");
   }
 
   return {
     name: trimmedName,
     email: normalizedEmail,
-    password,
+    password: rawPassword,
   };
 }
 
@@ -85,24 +89,25 @@ export function validateLoginInput(data: unknown): ILoginInput {
     throw ApiError.badRequest("Invalid request body: expected JSON object.");
   }
 
-  const body = data as Record<string, any>;
-  const { email, password } = body;
+  const body = data as Record<string, unknown>;
+  const rawEmail = body.email;
+  const rawPassword = body.password;
 
-  if (!email || typeof email !== "string") {
+  if (!rawEmail || typeof rawEmail !== "string") {
     throw ApiError.badRequest("Email is required.");
   }
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = rawEmail.trim().toLowerCase();
   if (!EMAIL_REGEX.test(normalizedEmail)) {
     throw ApiError.badRequest("Please provide a valid email address.");
   }
 
-  if (!password || typeof password !== "string" || !password.length) {
+  if (!rawPassword || typeof rawPassword !== "string" || !rawPassword.length) {
     throw ApiError.badRequest("Password is required.");
   }
 
   return {
     email: normalizedEmail,
-    password,
+    password: rawPassword,
   };
 }
 
@@ -114,15 +119,15 @@ export function validateRefreshTokenInput(data: unknown): IRefreshTokenInput {
     throw ApiError.badRequest("Invalid request body: expected JSON object.");
   }
 
-  const body = data as Record<string, any>;
-  const { refreshToken } = body;
+  const body = data as Record<string, unknown>;
+  const rawRefreshToken = body.refreshToken;
 
-  if (!refreshToken || typeof refreshToken !== "string" || !refreshToken.trim().length) {
+  if (!rawRefreshToken || typeof rawRefreshToken !== "string" || !rawRefreshToken.trim().length) {
     throw ApiError.badRequest("Refresh token is required.");
   }
 
   return {
-    refreshToken: refreshToken.trim(),
+    refreshToken: rawRefreshToken.trim(),
   };
 }
 
@@ -134,11 +139,11 @@ export function validateLogoutInput(data: unknown): ILogoutInput {
     return {};
   }
 
-  const body = data as Record<string, any>;
-  const { refreshToken } = body;
+  const body = data as Record<string, unknown>;
+  const rawRefreshToken = body.refreshToken;
 
-  if (refreshToken && typeof refreshToken === "string") {
-    return { refreshToken: refreshToken.trim() };
+  if (rawRefreshToken && typeof rawRefreshToken === "string") {
+    return { refreshToken: rawRefreshToken.trim() };
   }
 
   return {};
