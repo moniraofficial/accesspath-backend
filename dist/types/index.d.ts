@@ -3,11 +3,17 @@ import { UserRoleType } from "../config/roles.js";
 export * from "./user.types.js";
 export * from "./refresh-token.types.js";
 export * from "./failed-login.types.js";
+export * from "./location.types.js";
+export * from "./barrier.types.js";
+export * from "./feedback.types.js";
+export * from "./favorite.types.js";
+export * from "./route.types.js";
 export interface IAuthUser {
     id: string;
     email: string;
     role: UserRoleType;
     tokenVersion?: number;
+    familyId?: string;
 }
 export interface IPaginationMeta {
     page: number;

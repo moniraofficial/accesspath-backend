@@ -3,30 +3,10 @@ import "./config/env.js";
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-import express, { Request, Response } from "express";
 import mongoose from "mongoose";
-import cors from "cors";
+import app from "./app.js";
 
-import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
-import { sendResponse } from "./utils/apiResponse.js";
-
-const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Core Middlewares
-app.use(cors());
-app.use(express.json());
-
-// Root Health / Test Endpoint
-app.get("/", (req: Request, res: Response) => {
-  return sendResponse(res, 200, "AccessPath TypeScript backend server is running");
-});
-
-// 404 Route Not Found Middleware
-app.use(notFoundHandler);
-
-// Global Centralized Error Handling Middleware
-app.use(errorHandler);
 
 // MongoDB Connection & Server Start
 const connectDBAndStartServer = async (): Promise<void> => {

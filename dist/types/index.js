@@ -17,4 +17,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./user.types.js"), exports);
 __exportStar(require("./refresh-token.types.js"), exports);
 __exportStar(require("./failed-login.types.js"), exports);
+__exportStar(require("./location.types.js"), exports);
+__exportStar(require("./barrier.types.js"), exports);
+__exportStar(require("./feedback.types.js"), exports);
+__exportStar(require("./favorite.types.js"), exports);
+__exportStar(require("./route.types.js"), exports);
 //# sourceMappingURL=index.js.map
